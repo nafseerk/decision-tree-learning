@@ -6,6 +6,23 @@ Records with isColic=colic is considered positive
 and with isColic=healthy is considered negative
 '''
 TARGET_ATTRIBUTE = 'isColic'
+ATTRIBUTES = ['K',
+              'Na',
+              'CL',
+              'HCO3',
+              'Endotoxin',
+              'Aniongap',
+              'PLA2',
+              'SDH',
+              'GLDH',
+              'TPP',
+              'Breath rate',
+              'PCV',
+              'Pulse rate',
+              'Fibrinogen',
+              'Dimer',
+              'FibPerDim'
+             ]
 
 
 def entropy(v1, v2):
@@ -28,20 +45,37 @@ def remainder(data, attribute):
     if data is None or attribute is None or attribute not in data:
         raise ValueError("Bad arguments")
 
+    lowest_remainder = None
+    best_threshold = None
+
     total = float(data.shape[0])
-    unique_values = data[attribute].unique()
-    result = 0.0
+    sorted_unique_values = sorted(set(data[attribute]))
 
-    for value in unique_values:
-        filtered_data = data.loc[data[attribute] == value]
-        total_with_this_value = float(filtered_data.shape[0])
-        p_with_this_value = float(filtered_data.loc[data[TARGET_ATTRIBUTE] == 'colic'].shape[0])
-        p_ratio = p_with_this_value/total_with_this_value
-        n_with_this_value = float(filtered_data.loc[data[TARGET_ATTRIBUTE] == 'healthy'].shape[0])
-        n_ratio = n_with_this_value/total_with_this_value
-        result += total_with_this_value/total * entropy(p_ratio, n_ratio)
+    for threshold in sorted_unique_values:
+        remainder_value = 0.0
+        filtered_data = data.loc[data[attribute] <= threshold]
+        total_below_threshold = float(filtered_data.shape[0])
+        if total_below_threshold > 0:
+            p_below_threshold = float(filtered_data.loc[data[TARGET_ATTRIBUTE] == 'colic'].shape[0])
+            p_ratio = p_below_threshold/total_below_threshold
+            n_below_threshold = float(filtered_data.loc[data[TARGET_ATTRIBUTE] == 'healthy'].shape[0])
+            n_ratio = n_below_threshold/total_below_threshold
+            remainder_value += total_below_threshold/total * entropy(p_ratio, n_ratio)
 
-    return result
+        filtered_data = data.loc[data[attribute] > threshold]
+        total_above_threshold = float(filtered_data.shape[0])
+        if total_above_threshold > 0:
+            p_above_threshold = float(filtered_data.loc[data[TARGET_ATTRIBUTE] == 'colic'].shape[0])
+            p_ratio = p_above_threshold / total_above_threshold
+            n_above_threshold = float(filtered_data.loc[data[TARGET_ATTRIBUTE] == 'healthy'].shape[0])
+            n_ratio = n_above_threshold / total_above_threshold
+            remainder_value += total_above_threshold / total * entropy(p_ratio, n_ratio)
+
+        if lowest_remainder is None or remainder_value < lowest_remainder:
+            lowest_remainder = remainder_value
+            best_threshold = threshold
+
+    return lowest_remainder, best_threshold
 
 
 def information_gain(data, attribute):
@@ -53,8 +87,23 @@ def information_gain(data, attribute):
     p_ratio = positive_count/total
     n_ratio = negative_count/total
 
-    print('entropy=%f' % entropy(p_ratio, n_ratio))
-    return entropy(p_ratio, n_ratio) - remainder(data, attribute)
+    lowest_remainder, best_threshold = remainder(data, attribute)
+    return entropy(p_ratio, n_ratio) - lowest_remainder, best_threshold
+
+
+def get_best_attribute(data):
+    max_information_gain = - 1
+    best_attribute = None
+    best_threshold = None
+
+    for attribute in ATTRIBUTES:
+        ig, threshold = information_gain(data, attribute)
+        if ig > max_information_gain:
+            max_information_gain = ig
+            best_attribute = attribute
+            best_threshold = threshold
+
+    return best_attribute, best_threshold, max_information_gain
 
 
 if __name__ == '__main__':
@@ -67,3 +116,4 @@ if __name__ == '__main__':
     testData = DataHelper.get_test_data()
     print(remainder(trainData, 'K'))
     print(information_gain(trainData, 'K'))
+    print(get_best_attribute(trainData))
