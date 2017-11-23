@@ -64,8 +64,10 @@ class DecisionTreeLearning(object):
                 correctly_classified += 1
             predictions.append(prediction)
 
-        accuracy = correctly_classified / total * 100
-        print('Accuracy = %.2f' % accuracy)
+        if report_accuracy:
+            accuracy = correctly_classified / total * 100
+            print('Accuracy = %.2f %%' % accuracy)
+
         return predictions
 
 
@@ -103,6 +105,16 @@ if __name__ == '__main__':
     testData = DataHelper.get_test_data()
 
     learned_decision_tree = DecisionTreeLearning.learn(trainData, DataHelper.get_attributes(), mode(trainData))
-    predictedY = DecisionTreeLearning.predict(learned_decision_tree, testData)
-    print(predictedY)
+    print('==On Test Data==')
+    predictedY = DecisionTreeLearning.predict(learned_decision_tree, testData, report_accuracy=True)
+    print('Predictions:')
+    for i in range(len(predictedY)):
+        print('%d. %s' % (i + 1, predictedY[i]))
+    print()
+
+    print('==On Training Data==')
+    training_predictions = DecisionTreeLearning.predict(learned_decision_tree, trainData, report_accuracy=True)
+    print('Predictions:')
+    for i in range(len(training_predictions)):
+        print('%d. %s' % (i + 1, training_predictions[i]))
 
