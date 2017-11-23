@@ -1,29 +1,6 @@
 import math
 from data_helper import DataHelper
 
-'''
-Records with isColic=colic is considered positive
-and with isColic=healthy is considered negative
-'''
-TARGET_ATTRIBUTE = 'isColic'
-ATTRIBUTES = ['K',
-              'Na',
-              'CL',
-              'HCO3',
-              'Endotoxin',
-              'Aniongap',
-              'PLA2',
-              'SDH',
-              'GLDH',
-              'TPP',
-              'Breath rate',
-              'PCV',
-              'Pulse rate',
-              'Fibrinogen',
-              'Dimer',
-              'FibPerDim'
-             ]
-
 
 def entropy(v1, v2):
     if v1 < 0 or v2 < 0:
@@ -53,21 +30,21 @@ def remainder(data, attribute):
 
     for threshold in sorted_unique_values:
         remainder_value = 0.0
-        filtered_data = data.loc[data[attribute] <= threshold]
+        filtered_data = data.loc[data[attribute] < threshold]
         total_below_threshold = float(filtered_data.shape[0])
         if total_below_threshold > 0:
-            p_below_threshold = float(filtered_data.loc[data[TARGET_ATTRIBUTE] == 'colic'].shape[0])
+            p_below_threshold = float(filtered_data.loc[data[DataHelper.get_target_class()] == 'colic'].shape[0])
             p_ratio = p_below_threshold/total_below_threshold
-            n_below_threshold = float(filtered_data.loc[data[TARGET_ATTRIBUTE] == 'healthy'].shape[0])
+            n_below_threshold = float(filtered_data.loc[data[DataHelper.get_target_class()] == 'healthy'].shape[0])
             n_ratio = n_below_threshold/total_below_threshold
             remainder_value += total_below_threshold/total * entropy(p_ratio, n_ratio)
 
-        filtered_data = data.loc[data[attribute] > threshold]
+        filtered_data = data.loc[data[attribute] >= threshold]
         total_above_threshold = float(filtered_data.shape[0])
         if total_above_threshold > 0:
-            p_above_threshold = float(filtered_data.loc[data[TARGET_ATTRIBUTE] == 'colic'].shape[0])
+            p_above_threshold = float(filtered_data.loc[data[DataHelper.get_target_class()] == 'colic'].shape[0])
             p_ratio = p_above_threshold / total_above_threshold
-            n_above_threshold = float(filtered_data.loc[data[TARGET_ATTRIBUTE] == 'healthy'].shape[0])
+            n_above_threshold = float(filtered_data.loc[data[DataHelper.get_target_class()] == 'healthy'].shape[0])
             n_ratio = n_above_threshold / total_above_threshold
             remainder_value += total_above_threshold / total * entropy(p_ratio, n_ratio)
 
@@ -81,8 +58,8 @@ def remainder(data, attribute):
 def information_gain(data, attribute):
     if data is None or attribute is None or attribute not in data:
         raise ValueError("Bad arguments")
-    positive_count = float(data.loc[data[TARGET_ATTRIBUTE] == 'colic'].shape[0])
-    negative_count = float(data.loc[data[TARGET_ATTRIBUTE] == 'healthy'].shape[0])
+    positive_count = float(data.loc[data[DataHelper.get_target_class()] == 'colic'].shape[0])
+    negative_count = float(data.loc[data[DataHelper.get_target_class()] == 'healthy'].shape[0])
     total = positive_count + negative_count
     p_ratio = positive_count/total
     n_ratio = negative_count/total
@@ -91,12 +68,12 @@ def information_gain(data, attribute):
     return entropy(p_ratio, n_ratio) - lowest_remainder, best_threshold
 
 
-def get_best_attribute(data):
+def get_best_attribute(data, attributes):
     max_information_gain = - 1
     best_attribute = None
     best_threshold = None
 
-    for attribute in ATTRIBUTES:
+    for attribute in attributes:
         ig, threshold = information_gain(data, attribute)
         if ig > max_information_gain:
             max_information_gain = ig
@@ -116,4 +93,4 @@ if __name__ == '__main__':
     testData = DataHelper.get_test_data()
     print(remainder(trainData, 'K'))
     print(information_gain(trainData, 'K'))
-    print(get_best_attribute(trainData))
+    print(get_best_attribute(trainData, DataHelper.get_attributes()))

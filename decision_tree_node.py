@@ -40,6 +40,9 @@ class DecisionTreeNode(object):
             elif which == 'right':
                 self._right_child = child_node
 
+    def is_leaf_node(self):
+        return self._is_leaf_node
+
     def print_details(self):
         if self._is_leaf_node:
             print(self._attribute)
@@ -57,11 +60,3 @@ if __name__ == '__main__':
     decisionTreeNode.set_child(child1, 'left')
     decisionTreeNode.set_child(child2, 'right')
     decisionTreeNode.print_details()
-
-
-
-
-
-
-
-

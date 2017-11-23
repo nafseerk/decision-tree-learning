@@ -25,6 +25,14 @@ class DataHelper(object):
     test_file = 'horseTest.txt'
 
     @classmethod
+    def get_attributes(cls):
+        return DataHelper.attributes
+
+    @classmethod
+    def get_target_class(cls):
+        return DataHelper.target_class
+
+    @classmethod
     def get_train_x(cls):
         columns = DataHelper.attributes + [DataHelper.target_class]
         df = pd.read_csv(DataHelper.train_file, header=None, names=columns)
@@ -72,11 +80,7 @@ class DataHelper(object):
 if __name__ == '__main__':
     trainX = DataHelper.get_train_x()
     trainY = DataHelper.get_train_y()
+    trainData = DataHelper.get_train_data()
     testX = DataHelper.get_test_x()
     testY = DataHelper.get_test_y()
-    print(trainX.head(5))
-    print(trainY.head(5))
-    print(testX.head(5))
-    print(testY.head(5))
-    print(type(trainX['Na'][1]))
-    print(testX.shape[0])
+    testData = DataHelper.get_test_data()
