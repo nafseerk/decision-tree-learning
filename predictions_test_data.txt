@@ -1,0 +1,15 @@
+Accuracy = 100.00 %
+Predictions:
+1. healthy
+2. healthy
+3. healthy
+4. healthy
+5. healthy
+6. colic
+7. colic
+8. colic
+9. colic
+10. colic
+11. colic
+12. colic
+13. colic

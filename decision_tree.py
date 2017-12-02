@@ -55,6 +55,7 @@ class DecisionTree(object):
     def plot(self):
         tree_plt = pgv.AGraph(directed=True)
         tree_plt.graph_attr["ordering"] = "out"
+        tree_plt.graph_attr['label'] = 'Decision Tree for Equine Colic Diagnosis'
         DecisionTree.node_counter = 0
         self._plot(self.__root, tree_plt)
         tree_plt.layout()
