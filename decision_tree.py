@@ -1,9 +1,12 @@
 from data_helper import DataHelper
 from decision_tree_node import DecisionTreeNode
 from util import get_best_attribute
+import pygraphviz as pgv
 
 
 class DecisionTree(object):
+
+    node_counter = 0
 
     def __init__(self, root_node):
         self.__root = root_node
@@ -11,8 +14,51 @@ class DecisionTree(object):
     def get_root_node(self):
         return self.__root
 
-    def print_tree(self):
-        pass
+    def _plot(self, node, tree_plot):
+        if node is None:
+            return
+
+        current_node = node
+
+        if not current_node.is_leaf_node():
+            current_node_str = 'Test: %s < %.2f' % (current_node.get_attribute(), current_node.get_threshold())
+            DecisionTree.node_counter += 1
+            tree_plot.add_node(current_node_str, shape='rectangle', color='blue')
+            left_child = current_node.get_child(which='left')
+            if left_child.is_leaf_node():
+                DecisionTree.node_counter += 1
+                left_child_str = left_child.get_attribute()
+                tree_plot.add_node(left_child_str + str(DecisionTree.node_counter),
+                                   label=left_child_str,
+                                   shape='circle',
+                                   color='green')
+                tree_plot.add_edge(current_node_str, left_child_str + str(DecisionTree.node_counter), label='Yes')
+            else:
+                left_child_str = 'Test: %s < %.2f' % (left_child.get_attribute(), left_child.get_threshold())
+                tree_plot.add_edge(current_node_str, left_child_str, label='Yes')
+            self._plot(left_child, tree_plot)
+
+            right_child = current_node.get_child(which='right')
+            if right_child.is_leaf_node():
+                DecisionTree.node_counter += 1
+                right_child_str = right_child.get_attribute()
+                tree_plot.add_node(right_child_str + str(DecisionTree.node_counter),
+                                   label=right_child_str,
+                                   shape='circle',
+                                   color='green')
+                tree_plot.add_edge(current_node_str, right_child_str + str(DecisionTree.node_counter), label='No')
+            else:
+                right_child_str = 'Test: %s < %.2f' % (right_child.get_attribute(), right_child.get_threshold())
+                tree_plot.add_edge(current_node_str, right_child_str, label='No')
+            self._plot(right_child, tree_plot)
+
+    def plot(self):
+        tree_plt = pgv.AGraph(directed=True)
+        tree_plt.graph_attr["ordering"] = "out"
+        DecisionTree.node_counter = 0
+        self._plot(self.__root, tree_plt)
+        tree_plt.layout()
+        tree_plt.draw('output.png', prog='dot')
 
 
 class DecisionTreeLearning(object):
@@ -105,6 +151,8 @@ if __name__ == '__main__':
     testData = DataHelper.get_test_data()
 
     learned_decision_tree = DecisionTreeLearning.learn(trainData, DataHelper.get_attributes(), mode(trainData))
+    learned_decision_tree.plot()
+
     print('==On Test Data==')
     predictedY = DecisionTreeLearning.predict(learned_decision_tree, testData, report_accuracy=True)
     print('Predictions:')
