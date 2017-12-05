@@ -1,4 +1,14 @@
 class DecisionTreeNode(object):
+	'''
+	Class for representing a single node of decision tree. Contains the fields:
+	1. self._is_leaf_node - indicates if this is a leaf node
+	2. self._attribute - If the node is leaf node, then takes the value 'colic' or 'healthy'. 
+						Otherwise, denotes one of the attributes of the data (one of 16 in this example)
+	Remaining fields are present only if self._is_leaf_node = False
+	3. self._threshold - represents the threshold value of the attribute that splits the data into 2 parts
+	4. self._left_child - represents all data which is less than threshold 
+	5. self._right_child - represents all data which is greather than or equal to the threshold
+	'''
 
     def __init__(self, attribute, threshold=None, is_leaf_node=False):
         self._attribute = attribute

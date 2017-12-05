@@ -6,6 +6,7 @@ import pygraphviz as pgv
 
 class DecisionTree(object):
 
+	#internal node_counter that is part of the plotting logic
     node_counter = 0
 
     def __init__(self, root_node):
@@ -14,6 +15,7 @@ class DecisionTree(object):
     def get_root_node(self):
         return self.__root
 
+    #For drawing the decision tree diagram
     def _plot(self, node, tree_plot):
         if node is None:
             return
@@ -63,6 +65,11 @@ class DecisionTree(object):
 
 
 class DecisionTreeLearning(object):
+	'''
+	Class for representing Decision Tree Learning logic. Contains two methods:
+	1. learn - that builds the decision tree from the training data
+	2. predict - that uses the constructed decision tree for classifying new data
+	'''
 
     @classmethod
     def learn(cls, data, attributes, default):
@@ -118,6 +125,10 @@ class DecisionTreeLearning(object):
         return predictions
 
 
+'''
+Returns the most common classfication (or mode) of the given data. Returned as a 
+single node representing 'colic' or 'healthy'
+'''
 def mode(data):
     if data is None:
         raise ValueError('Data is empty')
@@ -133,7 +144,9 @@ def mode(data):
     else:
         return DecisionTreeNode('healthy', is_leaf_node=True)
 
-
+'''
+Returns True if all examples of given data are of same class
+'''
 def is_date_same_class(data):
     if data is None:
         raise ValueError('Data is empty')

@@ -17,7 +17,9 @@ def entropy(v1, v2):
     v2_term = 0.0 if (v2_ratio == 0.0) else - v2_ratio * math.log(v2_ratio, 2)
     return v1_term + v2_term
 
-
+#Returns the lowest remainder value for the given attribute and the corresponding threshold
+#Tries every unique value from min to max (of the given data) as a possible threshold and reuturns
+#the remainder with lowest value 
 def remainder(data, attribute):
     if data is None or attribute is None or attribute not in data:
         raise ValueError("Bad arguments")
@@ -54,7 +56,8 @@ def remainder(data, attribute):
 
     return lowest_remainder, best_threshold
 
-
+#Returns the information gain of a given attribute. To maximise information gain, 
+# the remainder has to be minimised. remainder method, by default, returns the lowest remainder value
 def information_gain(data, attribute):
     if data is None or attribute is None or attribute not in data:
         raise ValueError("Bad arguments")
@@ -67,7 +70,8 @@ def information_gain(data, attribute):
     lowest_remainder, best_threshold = remainder(data, attribute)
     return entropy(p_ratio, n_ratio) - lowest_remainder, best_threshold
 
-
+#Returns the attribute with the highest value for information gain. Returns a 3-tuple of
+# the best attribute, the best threshold of that attribute and the information gain value
 def get_best_attribute(data, attributes):
     max_information_gain = - 1
     best_attribute = None
